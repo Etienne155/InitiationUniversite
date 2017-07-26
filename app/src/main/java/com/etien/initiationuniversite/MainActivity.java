@@ -56,18 +56,22 @@ public class MainActivity extends AppCompatActivity {
                 // Update count on click
                 textView.setText("" + ++count);
 
-                // Change button position
-                // Random width change
-                cSet.setVerticalBias(R.id.buttonCount, getRandomFloat());
-                cSet.setHorizontalBias(R.id.buttonCount, getRandomFloat());
-                cSet.applyTo(cLayout);
-
                 if (getRandomInt(0,1) == 0) {
                     // change background color
                     int red = getRandomInt(0, 255);
                     int green = getRandomInt(0, 255);
                     int blue = getRandomInt(0, 255);
                     lLayout.setBackgroundColor(Color.argb(255, red, green, blue));
+                }
+
+                if (count % 50 == 0) {
+                    // reCAPTCHA
+                } else {
+                    // Change button position
+                    // Random width change
+                    cSet.setVerticalBias(R.id.buttonCount, getRandomFloat());
+                    cSet.setHorizontalBias(R.id.buttonCount, getRandomFloat());
+                    cSet.applyTo(cLayout);
                 }
 
                 // Message
