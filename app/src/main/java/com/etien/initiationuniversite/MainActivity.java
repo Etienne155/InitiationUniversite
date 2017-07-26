@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     String pref = "PREFS";
     TextView textView;
     Button button;
+    LinearLayout lLayout;
     ConstraintLayout cLayout;
     ConstraintSet cSet;
     static int count;
@@ -37,7 +38,8 @@ public class MainActivity extends AppCompatActivity {
         // Get views
         textView = (TextView) findViewById(R.id.count);
         button = (Button) findViewById(R.id.buttonCount);
-        cLayout = (ConstraintLayout) findViewById(R.id.layout);
+        lLayout = (LinearLayout) findViewById(R.id.linear_layout);
+        cLayout = (ConstraintLayout) findViewById(R.id.constraint_layout);
 
         // Init constraint set
         cSet = new ConstraintSet();
@@ -59,6 +61,12 @@ public class MainActivity extends AppCompatActivity {
                 cSet.setVerticalBias(R.id.buttonCount, getRandomFloat());
                 cSet.setHorizontalBias(R.id.buttonCount, getRandomFloat());
                 cSet.applyTo(cLayout);
+
+                // change background color
+                int red = getRandomInt(0,255);
+                int green = getRandomInt(0,255);
+                int blue = getRandomInt(0,255);
+                cLayout.setBackgroundColor(Color.argb(255, red, green, blue));
 
                 // Message
                 Resources res = getResources();
