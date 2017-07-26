@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
                 int red = getRandomInt(0,255);
                 int green = getRandomInt(0,255);
                 int blue = getRandomInt(0,255);
-                cLayout.setBackgroundColor(Color.argb(255, red, green, blue));
+                lLayout.setBackgroundColor(Color.argb(255, red, green, blue));
 
                 // Message
                 Resources res = getResources();
