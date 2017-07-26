@@ -1,6 +1,7 @@
 package com.etien.initiationuniversite;
 
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.support.constraint.ConstraintLayout;
@@ -72,6 +73,22 @@ public class MainActivity extends AppCompatActivity {
                     cSet.setVerticalBias(R.id.buttonCount, getRandomFloat());
                     cSet.setHorizontalBias(R.id.buttonCount, getRandomFloat());
                     cSet.applyTo(cLayout);
+                }
+
+                /*
+                * 1 : 25
+                * 2 : 50
+                * 3 : 75
+                * 4 : 100
+                * */
+                if (count % 4 == 0) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else if (count % 3 == 0) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                } else if (count % 2 == 0) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                } else if (count % 1 == 0) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
                 }
 
                 // Message
