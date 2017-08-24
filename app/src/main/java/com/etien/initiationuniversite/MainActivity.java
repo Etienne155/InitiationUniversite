@@ -7,6 +7,7 @@ import android.animation.ValueAnimator;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AppCompatActivity;
@@ -14,15 +15,22 @@ import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.util.Random;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.safetynet.SafetyNet;
+import com.google.android.gms.safetynet.SafetyNetApi;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 
-public class MainActivity extends AppCompatActivity {
+import java.util.Random;
+import java.util.concurrent.Executor;
+
+public class MainActivity extends AppCompatActivity implements Executor {
 
     String pref = "PREFS";
     TextView textView;
@@ -87,8 +95,9 @@ public class MainActivity extends AppCompatActivity {
                     lLayout.setBackgroundColor(Color.argb(255, red, green, blue));
                 }
 
-                if (count % 50 == 0) {
+                if (count % 3 == 0) {
                     // reCAPTCHA
+                    reCAPTCHA();
                 } else {
                     if (count >= 20) {
                         // Change button position
@@ -118,6 +127,40 @@ public class MainActivity extends AppCompatActivity {
         bounceAnimation();
     }
 
+    public void reCAPTCHA() {
+        SafetyNet.getClient(this).verifyWithRecaptcha("6LfSTCoUAAAAADXo17hcVLx60yK7PHinMLhuUxpZ")
+                .addOnSuccessListener((Executor) this,
+                        new OnSuccessListener<SafetyNetApi.RecaptchaTokenResponse>() {
+                            @Override
+                            public void onSuccess(SafetyNetApi.RecaptchaTokenResponse response) {
+                                // Indicates communication with reCAPTCHA service was
+                                // successful.
+                                String userResponseToken = response.getTokenResult();
+                                if (!userResponseToken.isEmpty()) {
+                                    // Validate the user response token using the
+                                    // reCAPTCHA siteverify API.
+                                    Log.d("reCAPTCHA", "reCAPTCHA solved successfully");
+                                }
+                            }
+                        })
+                .addOnFailureListener((Executor) this, new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        if (e instanceof ApiException) {
+                            // An error occurred when communicating with the
+                            // reCAPTCHA service. Refer to the status code to
+                            // handle the error appropriately.
+                            ApiException apiException = (ApiException) e;
+                            int statusCode = apiException.getStatusCode();
+                            Log.d("reCAPTCHA", "Error: " + CommonStatusCodes
+                                    .getStatusCodeString(statusCode));
+                        } else {
+                            // A different, unknown type of error occurred.
+                            Log.d("reCAPTCHA", "Error: " + e.getMessage());
+                        }
+                    }
+                });
+    }
 
     public int getRandomInt(int min, int max) {
         Random rand = new Random();
@@ -207,5 +250,9 @@ public class MainActivity extends AppCompatActivity {
                 startAnimations(getRandomFloat(), (yBias + 1) % 2);
                 break;
         }
+    }
+    @Override
+    public void execute(@NonNull Runnable command) {
+        command.run();
     }
 }
