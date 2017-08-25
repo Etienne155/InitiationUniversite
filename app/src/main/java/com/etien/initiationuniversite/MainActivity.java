@@ -41,12 +41,17 @@ public class MainActivity extends AppCompatActivity implements Executor {
     ConstraintSet cSet;
 
     double screenRatio;
-    Float xBias;
-    Float yBias;
+    float xBias;
+    float yBias;
+    long duration;
+    int orientation;
 
     AnimatorSet movingButton;
     ValueAnimator buttonXAnimation;
     ValueAnimator buttonYAnimation;
+
+    final int[] levels = {-1, 0, 100, 200, 250, 300, 350, 400, 450, 500, 550, 585, 650};
+    final int[] challenges = {650};
 
     static int count;
 
@@ -58,6 +63,9 @@ public class MainActivity extends AppCompatActivity implements Executor {
         // Init count
         final SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
         count = shared.getInt("Count", 0);
+//        SharedPreferences.Editor editor = shared.edit();
+//        editor.putInt("Count", 0);
+//        editor.apply();
 
         // Get views
         textView = (TextView) findViewById(R.id.count);
@@ -71,6 +79,9 @@ public class MainActivity extends AppCompatActivity implements Executor {
 
         xBias = 0.5f;
         yBias = 0.5f;
+
+        duration = -1;
+        orientation = 0;
 
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -86,44 +97,6 @@ public class MainActivity extends AppCompatActivity implements Executor {
 
                 // Update count on click
                 textView.setText("" + ++count);
-                bounceAnimation();
-
-                if (count >= 40 && getRandomInt(0,1) == 0) {
-                    // change background color
-                    int red = getRandomInt(0, 255);
-                    int green = getRandomInt(0, 255);
-                    int blue = getRandomInt(0, 255);
-                    lLayout.setBackgroundColor(Color.argb(255, red, green, blue));
-                }
-
-                if (count % 3 == 0) {
-                    // reCAPTCHA
-                    reCAPTCHA();
-                } else {
-                    if (count >= 20) {
-                        // Change button position
-                        // Random width change
-                        cSet.setVerticalBias(R.id.buttonCount, getRandomFloat());
-                        cSet.setHorizontalBias(R.id.buttonCount, getRandomFloat());
-                        cSet.applyTo(cLayout);
-                    }
-                }
-
-                /*
-                * 1 : 25
-                * 2 : 50
-                * 3 : 75
-                * 4 : 100
-                * */
-                if (count % 4 == 0) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else if (count % 3 == 0) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                } else if (count % 2 == 0) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                } else if (count % 1 == 0) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                }
 
                 // Message
                 Resources res = getResources();
@@ -138,10 +111,145 @@ public class MainActivity extends AppCompatActivity implements Executor {
                 SharedPreferences.Editor editor = shared.edit();
                 editor.putInt("Count", count);
                 editor.apply();
+
+                boolean excecuted = false;
+                switch (count) {
+                    case 650:
+                        resetBackground();
+                        resetOrientation();
+                        duration = 1;
+                        bounceAnimation();
+                        excecuted = true;
+                        break;
+                }
+
+                for (int i = 0; i < levels.length && !excecuted; i++) {
+                    if (count == levels[i]) {
+                        reCAPTCHA();
+                        excecuted = true;
+                    }
+                }
+
+                if (!excecuted) {
+                    if (count > levels[11]) {
+                        resetBackground();
+                        resetOrientation();
+                        changePosition();
+                        bounceAnimation();
+                    } else if (count > levels[10]) {
+                        stopAnimation();
+                        resetBackground();
+                        resetPosition();
+                        resetOrientation();
+                    } else if (count > levels[9]) {
+                        changeBackground();
+                        if (getRandomFloat() < 0.5f) {
+                            bounceAnimation();
+                        } else {
+                            stopAnimation();
+                        }
+                        if (getRandomFloat() < 0.5f) {
+                            changePosition();
+                        }
+                        if (getRandomFloat() < 0.5f) {
+                            changeOrientation();
+                        }
+                        if (getRandomFloat() < 0.15f) {
+                            reCAPTCHA();
+                        }
+                    } else if (count > levels[8]) {
+                        changeBackground();
+                        changePosition();
+                        bounceAnimation();
+                        changeOrientation();
+                    } else if (count > levels[7]) {
+                        changeBackground();
+                        resetOrientation();
+                        changePosition();
+                        bounceAnimation();
+                    } else if (count > levels[6]) {
+                        changeBackground();
+                        changeOrientation();
+                        bounceAnimation();
+                    } else if (count > levels[5]) {
+                        changeBackground();
+                        resetOrientation();
+                        bounceAnimation();
+                    } else if (count > levels[4]) {
+                        changeBackground();
+                        changePosition();
+                        changeOrientation();
+                    } else if (count > levels[3]) {
+                        changeBackground();
+                        resetOrientation();
+                        changePosition();
+                    } else if (count > levels[2]) {
+                        changeBackground();
+                        resetOrientation();
+                        resetPosition();
+                    } else if (count > levels[1]) {
+                        resetBackground();
+                        resetOrientation();
+                        resetPosition();
+                    }
+                }
             }
         });
+    }
 
-        bounceAnimation();
+    public void changePosition() {
+        // Change button position
+        // Random width change
+        stopAnimation();
+        xBias = getRandomFloat();
+        yBias = getRandomFloat();
+        cSet.setVerticalBias(R.id.buttonCount, xBias);
+        cSet.setHorizontalBias(R.id.buttonCount, yBias);
+        cSet.applyTo(cLayout);
+    }
+
+    public void resetPosition() {
+        // Put button back to center
+        stopAnimation();
+        xBias = 0.5f;
+        yBias = 0.5f;
+        cSet.setVerticalBias(R.id.buttonCount, xBias);
+        cSet.setHorizontalBias(R.id.buttonCount, yBias);
+        cSet.applyTo(cLayout);
+    }
+
+    public void changeBackground() {
+        // change background color
+        int red = getRandomInt(0, 255);
+        int green = getRandomInt(0, 255);
+        int blue = getRandomInt(0, 255);
+        lLayout.setBackgroundColor(Color.argb(255, red, green, blue));
+    }
+
+    public void resetBackground() {
+        lLayout.setBackgroundResource(android.R.color.background_light);
+    }
+
+    public void changeOrientation() {
+        switch (++orientation % 4) {
+            case 0:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                break;
+            case 1:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
+                break;
+            case 2:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                break;
+            case 3:
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
+                break;
+        }
+    }
+
+    public void resetOrientation() {
+        orientation = 0;
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
     public void reCAPTCHA() {
@@ -200,7 +308,6 @@ public class MainActivity extends AppCompatActivity implements Executor {
         buttonYAnimation = ValueAnimator.ofFloat(yBias, targetYBias);
 
 //        long duration = (long) Math.sqrt(Math.pow((targetXBias - xBias) * screenRatio, 2) + Math.pow(targetYBias - yBias, 2) * 100000.0);
-        long duration = 1000;
 
         // listener to update button position
         buttonXAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
@@ -224,7 +331,15 @@ public class MainActivity extends AppCompatActivity implements Executor {
         // Animation coordination
         movingButton = new AnimatorSet();
         movingButton.play(buttonXAnimation).with(buttonYAnimation);
-        movingButton.setDuration(duration);
+        if (duration > 0) {
+            if(getRandomFloat() < 0.30f) {
+                duration++;
+            }
+            movingButton.setDuration(duration);
+        } else {
+            movingButton.setDuration(1000);
+        }
+
         movingButton.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(Animator animation) {
@@ -266,6 +381,13 @@ public class MainActivity extends AppCompatActivity implements Executor {
             case 5:
                 startAnimations(getRandomFloat(), (yBias + 1) % 2);
                 break;
+        }
+    }
+
+    public void stopAnimation() {
+        if (movingButton != null) {
+            movingButton.removeAllListeners();
+            duration = -1;
         }
     }
     @Override
