@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
@@ -11,10 +12,13 @@ import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -195,6 +199,55 @@ public class MainActivity extends AppCompatActivity implements Executor {
                 }
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.count_reset) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Êtes-vous sûre de vouloir réinitialiser le compteur?")
+                   .setTitle("Réinitialisation du compteur");
+
+            builder.setPositiveButton("OUI", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    count = 0;
+                    textView.setText("0");
+
+                    SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
+                    SharedPreferences.Editor editor = shared.edit();
+                    editor.putInt("Count", 0);
+                    editor.apply();
+                }
+            });
+
+            builder.setNegativeButton("NON", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // do nothing
+                }
+            });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     public void changePosition() {
