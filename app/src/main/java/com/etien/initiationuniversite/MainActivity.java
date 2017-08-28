@@ -197,6 +197,18 @@ public class MainActivity extends AppCompatActivity implements Executor {
                         resetPosition();
                     }
                 }
+                if (count == 57/*7*/) {
+                    button.setText("***Haskell 4 life***");
+                } else if (count == 58/*78*/) {
+                    button.setText("click");
+                    Toast toast = Toast.makeText(getApplicationContext(), "Oups, passé tout droit, continuer", Toast.LENGTH_LONG);
+                    toast.show();
+                } else if (count == 60/*1*/) {
+                    Toast toast = Toast.makeText(getApplicationContext(), "Va falloir travailler un peu plus...", Toast.LENGTH_LONG);
+                    toast.show();
+                } else if (count == 65/*1*/) {
+                    button.setText("***Ceci n'est pas une affirmation***");
+                }
             }
         });
     }
