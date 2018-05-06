@@ -9,12 +9,12 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.constraint.ConstraintSet;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
@@ -54,9 +54,9 @@ public class MainActivity extends AppCompatActivity implements Executor {
     ValueAnimator buttonXAnimation;
     ValueAnimator buttonYAnimation;
 
-    final int[] levels = {-1, 0, 100, 200, 250, 300, 350, 400, 450, 500, 550, 585, 650};
-    final int[] challenges = {650};
+    final int[] levels = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
 
+    static boolean executed;
     static int count;
 
     @Override
@@ -64,12 +64,13 @@ public class MainActivity extends AppCompatActivity implements Executor {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Set title
+        setTitle("Initiation DIRO 2018");
+
         // Init count
         final SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
         count = shared.getInt("Count", 0);
-//        SharedPreferences.Editor editor = shared.edit();
-//        editor.putInt("Count", 0);
-//        editor.apply();
+        executed = shared.getBoolean("Executed", false);
 
         // Get views
         textView = (TextView) findViewById(R.id.count);
@@ -116,25 +117,13 @@ public class MainActivity extends AppCompatActivity implements Executor {
                 editor.putInt("Count", count);
                 editor.apply();
 
-                boolean excecuted = false;
-                switch (count) {
-                    case 650:
-                        resetBackground();
-                        resetOrientation();
-                        duration = 1;
-                        bounceAnimation();
-                        excecuted = true;
-                        break;
+                if (count == levels[11]) {
+                    executed = true;
+                    editor.putBoolean("Executed", executed);
+                    editor.apply();
                 }
 
-                for (int i = 0; i < levels.length && !excecuted; i++) {
-                    if (count == levels[i]) {
-                        reCAPTCHA();
-                        excecuted = true;
-                    }
-                }
-
-                if (!excecuted) {
+                if (!executed) {
                     if (count > levels[11]) {
                         resetBackground();
                         resetOrientation();
@@ -159,7 +148,7 @@ public class MainActivity extends AppCompatActivity implements Executor {
                             changeOrientation();
                         }
                         if (getRandomFloat() < 0.15f) {
-                            reCAPTCHA();
+                            //reCAPTCHA();
                         }
                     } else if (count > levels[8]) {
                         changeBackground();
@@ -197,16 +186,17 @@ public class MainActivity extends AppCompatActivity implements Executor {
                         resetPosition();
                     }
                 }
-                if (count == 577) {
+
+                if (count == levels[3] + 1) {
                     button.setText("***Haskell 4 life***");
                 } else if (count == 578) {
-                    button.setText("click");
+                    button.setText(levels[3] + 2);
                     Toast toast = Toast.makeText(getApplicationContext(), "Oups, passé tout droit, continuer", Toast.LENGTH_LONG);
                     toast.show();
-                } else if (count == 601) {
+                } else if (count == levels[9] + 1) {
                     Toast toast = Toast.makeText(getApplicationContext(), "Va falloir travailler un peu plus...", Toast.LENGTH_LONG);
                     toast.show();
-                } else if (count == 651) {
+                } else if (count == levels[11] + 1) {
                     button.setText("***Ceci n'est pas une affirmation***");
                 }
             }
@@ -215,19 +205,15 @@ public class MainActivity extends AppCompatActivity implements Executor {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main_menu, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.count_reset) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Êtes-vous sûre de vouloir réinitialiser le compteur?")
@@ -371,8 +357,6 @@ public class MainActivity extends AppCompatActivity implements Executor {
         // creating animations
         buttonXAnimation = ValueAnimator.ofFloat(xBias, targetXBias);
         buttonYAnimation = ValueAnimator.ofFloat(yBias, targetYBias);
-
-//        long duration = (long) Math.sqrt(Math.pow((targetXBias - xBias) * screenRatio, 2) + Math.pow(targetYBias - yBias, 2) * 100000.0);
 
         // listener to update button position
         buttonXAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
