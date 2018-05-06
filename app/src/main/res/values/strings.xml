@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Initiation 2018</string>
+    <string name="app_name">Activité d\'acceuil</string>
     <string-array name="messages">
         <item>Lâchez pas</item>
         <item>Vous y êtes presque</item>

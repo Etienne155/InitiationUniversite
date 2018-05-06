@@ -65,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements Executor {
         setContentView(R.layout.activity_main);
 
         // Set title
-        setTitle("Initiation DIRO 2018");
+        setTitle("Activités d'acceuil DIRO");
 
         // Init count
         final SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
