@@ -48,16 +48,17 @@ public class MainActivity extends AppCompatActivity implements Executor {
     float xBias;
     float yBias;
     long duration;
-    int orientation;
 
     AnimatorSet movingButton;
     ValueAnimator buttonXAnimation;
     ValueAnimator buttonYAnimation;
 
-    final int[] levels = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    //final int[] levels = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+    final int[] levels = {-1, 0, 3, 6, 9, 12, 15, 18, 21, 24, 27, 30, 33};
 
     static boolean executed;
     static int count;
+    static int random;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,9 +85,8 @@ public class MainActivity extends AppCompatActivity implements Executor {
 
         xBias = 0.5f;
         yBias = 0.5f;
-
+        random = 0;
         duration = -1;
-        orientation = 0;
 
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements Executor {
                 // Message
                 Resources res = getResources();
                 String[] messages = res.getStringArray(R.array.messages);
-                if (getRandomInt(0, 20) == 0) {
+                if (getRandomInt(0, 8) == 0) {
                     Toast.makeText(getApplicationContext(),
                             messages[getRandomInt(0, messages.length - 1)],
                             Toast.LENGTH_LONG).show();
@@ -118,89 +118,58 @@ public class MainActivity extends AppCompatActivity implements Executor {
                 editor.apply();
 
                 if (count == levels[11]) {
+                    Log.d("level", "EXECUTED TRUE, count:" + count);
+
+                    button.setText("***Réponse finale***");
+                    stopAnimation();
+
                     executed = true;
                     editor.putBoolean("Executed", executed);
                     editor.apply();
                 }
 
                 if (!executed) {
-                    if (count > levels[11]) {
-                        resetBackground();
-                        resetOrientation();
-                        changePosition();
-                        bounceAnimation();
-                    } else if (count > levels[10]) {
-                        stopAnimation();
-                        resetBackground();
-                        resetPosition();
-                        resetOrientation();
-                    } else if (count > levels[9]) {
-                        changeBackground();
-                        if (getRandomFloat() < 0.5f) {
-                            bounceAnimation();
-                        } else {
-                            stopAnimation();
-                        }
-                        if (getRandomFloat() < 0.5f) {
-                            changePosition();
-                        }
-                        if (getRandomFloat() < 0.5f) {
-                            changeOrientation();
-                        }
-                        if (getRandomFloat() < 0.15f) {
-                            //reCAPTCHA();
-                        }
-                    } else if (count > levels[8]) {
-                        changeBackground();
-                        changePosition();
-                        bounceAnimation();
-                        changeOrientation();
-                    } else if (count > levels[7]) {
-                        changeBackground();
-                        resetOrientation();
-                        changePosition();
-                        bounceAnimation();
-                    } else if (count > levels[6]) {
-                        changeBackground();
-                        changeOrientation();
-                        bounceAnimation();
-                    } else if (count > levels[5]) {
-                        changeBackground();
-                        resetOrientation();
-                        bounceAnimation();
-                    } else if (count > levels[4]) {
-                        changeBackground();
-                        changePosition();
-                        changeOrientation();
-                    } else if (count > levels[3]) {
-                        changeBackground();
-                        resetOrientation();
-                        changePosition();
-                    } else if (count > levels[2]) {
-                        changeBackground();
-                        resetOrientation();
-                        resetPosition();
-                    } else if (count > levels[1]) {
-                        resetBackground();
-                        resetOrientation();
-                        resetPosition();
-                    }
-                }
 
-                if (count == levels[3] + 1) {
-                    button.setText("***Haskell 4 life***");
-                } else if (count == 578) {
-                    button.setText(levels[3] + 2);
-                    Toast toast = Toast.makeText(getApplicationContext(), "Oups, passé tout droit, continuer", Toast.LENGTH_LONG);
-                    toast.show();
-                } else if (count == levels[9] + 1) {
-                    Toast toast = Toast.makeText(getApplicationContext(), "Va falloir travailler un peu plus...", Toast.LENGTH_LONG);
-                    toast.show();
-                } else if (count == levels[11] + 1) {
-                    button.setText("***Ceci n'est pas une affirmation***");
+                    if (count > levels[3]) {
+                        changeBackground();
+                    }
+
+                    if (count > levels[5]) {
+                        changePosition();
+                    }
+
+                    if (count == levels[6] || count == levels[7]) {
+                        reCAPTCHA();
+                    }
+
+                    if (count > levels[7] + 1) {
+                        bounceAnimation();
+                    }
+
+                    if (count == levels[3] + 1) {
+                        button.setText("***Haskell 4 life***");
+                    }
+
+                    if (count == levels[5] + 1) {
+                        Toast.makeText(getApplicationContext(),
+                                "Oups, passé tout droit, continuer", Toast.LENGTH_LONG)
+                                .show();
+                    }
+
+                    if (count == levels[8] + 1) {
+                        Toast.makeText(getApplicationContext(),
+                                "Va falloir travailler un peu plus...", Toast.LENGTH_LONG)
+                                .show();
+                    }
+
                 }
             }
         });
+    }
+
+    @Override
+    public void execute(@NonNull Runnable command) {
+        command.run();
     }
 
     @Override
@@ -222,9 +191,20 @@ public class MainActivity extends AppCompatActivity implements Executor {
             builder.setPositiveButton("OUI", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+
+                    Log.d("level", "REINITIALISER");
+
+                    // Init parameters
                     count = 0;
                     textView.setText("0");
+                    xBias = 0.5f;
+                    yBias = 0.5f;
+                    duration = -1;
+                    executed = false;
 
+                    stopAnimation();
+
+                    // Init count var
                     SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
                     SharedPreferences.Editor editor = shared.edit();
                     editor.putInt("Count", 0);
@@ -235,6 +215,8 @@ public class MainActivity extends AppCompatActivity implements Executor {
             builder.setNegativeButton("NON", new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
+                    Log.d("level", "PAS REINITIALISER");
+
                     // do nothing
                 }
             });
@@ -248,10 +230,12 @@ public class MainActivity extends AppCompatActivity implements Executor {
         return super.onOptionsItemSelected(item);
     }
 
+    /*
+     * Change button position
+     */
     public void changePosition() {
-        // Change button position
-        // Random width change
-        stopAnimation();
+        Log.d("level", "changePosition");
+
         xBias = getRandomFloat();
         yBias = getRandomFloat();
         cSet.setVerticalBias(R.id.buttonCount, xBias);
@@ -259,8 +243,12 @@ public class MainActivity extends AppCompatActivity implements Executor {
         cSet.applyTo(cLayout);
     }
 
+    /*
+     * Put button back to center
+     */
     public void resetPosition() {
-        // Put button back to center
+        Log.d("level","resetPosition");
+
         stopAnimation();
         xBias = 0.5f;
         yBias = 0.5f;
@@ -269,41 +257,49 @@ public class MainActivity extends AppCompatActivity implements Executor {
         cSet.applyTo(cLayout);
     }
 
+    /*
+     * Change background color
+     */
     public void changeBackground() {
-        // change background color
+        Log.d("level", "changeBackground");
+
         int red = getRandomInt(0, 255);
         int green = getRandomInt(0, 255);
         int blue = getRandomInt(0, 255);
         lLayout.setBackgroundColor(Color.argb(255, red, green, blue));
     }
 
+    /*
+     * Reset background color
+     */
     public void resetBackground() {
+        Log.d("level", "resetBackground");
+
         lLayout.setBackgroundResource(android.R.color.background_light);
     }
 
+    /*
+     * Change orientation
+     */
     public void changeOrientation() {
-        switch (++orientation % 4) {
-            case 0:
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                break;
-            case 1:
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                break;
-            case 2:
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                break;
-            case 3:
-                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                break;
-        }
+        Log.d("random","changeOrientation");
+
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
     }
 
+    /*
+     * Reset orientation
+     */
     public void resetOrientation() {
-        orientation = 0;
+        Log.d("level","resetOrientation");
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
     }
 
+
     public void reCAPTCHA() {
+        Log.d("level","reCAPTCHA");
+
         SafetyNet.getClient(this).verifyWithRecaptcha("6LfSTCoUAAAAADXo17hcVLx60yK7PHinMLhuUxpZ")
                 .addOnSuccessListener((Executor) this,
                         new OnSuccessListener<SafetyNetApi.RecaptchaTokenResponse>() {
@@ -338,17 +334,29 @@ public class MainActivity extends AppCompatActivity implements Executor {
                 });
     }
 
+
+    /*
+     * Get random int
+     */
     public int getRandomInt(int min, int max) {
         Random rand = new Random();
         return rand.nextInt((max - min) + 1) + min;
     }
 
+    /*
+     * Get random float
+     */
     public float getRandomFloat() {
         Random rand = new Random();
         return rand.nextFloat();
     }
 
+    /*
+     * Start animations
+     */
     public void startAnimations(float targetXBias, float targetYBias) {
+        Log.d("level", "startAnimations");
+
         // stopping previous animation
         if (movingButton != null) {
             movingButton.removeAllListeners();
@@ -400,7 +408,12 @@ public class MainActivity extends AppCompatActivity implements Executor {
         movingButton.start();
     }
 
+    /*
+     * Bounce animation
+     */
     public void bounceAnimation() {
+        Log.d("level", "bounceAnimation");
+
         int reboundType;
 
         if (xBias == 0 || xBias == 1) {
@@ -433,14 +446,16 @@ public class MainActivity extends AppCompatActivity implements Executor {
         }
     }
 
+    /*
+     Stop animation
+     */
     public void stopAnimation() {
+        Log.d("level", "stopAnimation");
+
         if (movingButton != null) {
             movingButton.removeAllListeners();
             duration = -1;
         }
     }
-    @Override
-    public void execute(@NonNull Runnable command) {
-        command.run();
-    }
+
 }
