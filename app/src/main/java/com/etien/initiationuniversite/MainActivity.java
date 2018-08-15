@@ -54,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements Executor {
     ValueAnimator buttonYAnimation;
 
     //final int[] levels = {-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
-    final int[] levels = {-1, 0, 250, 500, 700, 800, 1000, 1200, 1300, 1500, 1650, 1800, 2000};
+    final int[] levels = {-1, 0, 200, 500, 700, 800, 1000, 1200, 1300, 1500, 1600, 1800, 2000};
 
     static boolean executed;
     static int count;
@@ -67,11 +67,6 @@ public class MainActivity extends AppCompatActivity implements Executor {
 
         // Set title
         setTitle("Activités d'acceuil DIRO");
-
-        // Init count
-        final SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
-        count = shared.getInt("Count", 0);
-        executed = shared.getBoolean("Executed", false);
 
         // Get views
         textView = (TextView) findViewById(R.id.count);
@@ -91,6 +86,10 @@ public class MainActivity extends AppCompatActivity implements Executor {
         DisplayMetrics metrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(metrics);
         screenRatio = (double) metrics.widthPixels/metrics.heightPixels;
+
+        // Init variables
+        count = 0;
+        executed = false;
 
         // Init text
         textView.setText("" + count);
@@ -112,23 +111,19 @@ public class MainActivity extends AppCompatActivity implements Executor {
                             Toast.LENGTH_LONG).show();
                 }
 
-                // Sauvegarder la valeur count
-                SharedPreferences.Editor editor = shared.edit();
-                editor.putInt("Count", count);
-                editor.apply();
-
                 if (count == levels[11]) {
-                    Log.d("level", "EXECUTED TRUE, count:" + count);
+                    Log.d("levelbug", "EXECUTED TRUE, count:" + count);
 
                     button.setText("***Mot de passe : 42***");
                     stopAnimation();
 
                     executed = true;
-                    editor.putBoolean("Executed", executed);
-                    editor.apply();
+
                 }
 
                 if (!executed) {
+
+                    Log.d("levelbug", "count:" + count);
 
                     if (count > levels[3]) {
                         changeBackground();
@@ -204,11 +199,6 @@ public class MainActivity extends AppCompatActivity implements Executor {
 
                     stopAnimation();
 
-                    // Init count var
-                    SharedPreferences shared = getSharedPreferences(pref, MODE_PRIVATE);
-                    SharedPreferences.Editor editor = shared.edit();
-                    editor.putInt("Count", 0);
-                    editor.apply();
                 }
             });
 
